@@ -1,3 +1,4 @@
+```
 module part_1
 (
     i_clk_50M,
@@ -116,4 +117,4 @@ always @ (negedge (i_key_l&&i_key_r))//每0.1秒触发一次
        led_agd<=o_led_agd;
 endmodule
 	
-
+```
