@@ -1,0 +1,118 @@
+module part_1
+(
+    i_clk_50M,
+	 i_rst,
+	 i_key_l,
+	 i_key_r,
+	 cnt,
+	 o_led_agd
+	 
+);
+//-----------------------------
+input i_clk_50M;
+input i_rst;
+input i_key_l;
+input i_key_r;
+input cnt;
+output reg [2:0]o_led_agd;
+reg key_kiss_l;
+reg key_kiss_r;
+reg[2:0] led_agd;
+reg key_s_l;
+reg key_s_r;
+reg[25:0] cnt_1ds;
+reg cnt_1;
+//----------------------------
+always @ (posedge i_clk_50M or negedge i_rst)
+        begin
+		  if(!i_rst)
+		  cnt_1ds<=26'b0;
+		  else if(cnt_1ds==26'h4c4b40)//每零点1秒
+		  cnt_1ds<=26'h0;
+		  else
+		  cnt_1ds<=cnt_1ds+1'b1;
+		  end
+always @ (posedge cnt_1ds)//0.1秒的脉冲
+        if(!i_rst)
+		    cnt_1<=1'b0;
+		  else if(cnt_1ds<=26'h2625ad)
+		    cnt_1<=1;
+		  else 
+		    cnt_1<=1'b0;
+			 
+always @ ( *)
+       //if(!i_key_l)
+		   key_s_l<=i_key_l;
+		 //else 
+		   //key_s_l<=1'b1;
+			
+always @ ( *)//----------------change i_clk_50m
+		//if(!i_key_r)
+		   key_s_r<=i_key_r;
+		//else
+		   //key_s_r<=1'b1;
+		 
+		  
+//-----------------------------------------
+always @ (posedge i_clk_50M)
+       begin
+       if((!i_key_l)&&(!key_s_l))
+		   key_kiss_l<=1'b0;  
+		 else
+		   key_kiss_l<=1'b1;
+			end
+always @ (posedge i_clk_50M)
+       begin
+		 if((!i_key_r)&&(!key_s_r))
+		    key_kiss_r<=1'b0;
+			 else
+		   key_kiss_r<=1'b1;
+			end
+//--------------------------------------------------------------------
+			  
+always @ (posedge cnt or negedge i_rst)
+      begin
+		       if(!i_rst)
+		   begin
+			o_led_agd<=3'b101;
+			
+			end
+			else
+			begin
+		  if({key_kiss_l,key_kiss_r}==2'b01)
+		  begin
+		  case(led_agd)
+		   //3'b000: o_led_agd<=3'b101;
+			//3'b001: o_led_agd<=3'b000;
+			//3'b010: o_led_agd<=3'b000;
+			3'b011: o_led_agd<=  3'b011;
+			//3'b100: o_led_agd<=3'b000;
+		   3'b101: o_led_agd<=  3'b011;
+			3'b110: o_led_agd<=  3'b101;
+			//3'b111: o_led_agd<=  3'b101;
+		  default: o_led_agd<=  3'b101;
+		  endcase
+		  end
+		  else if({key_kiss_l,key_kiss_r}==2'b10)
+		  begin
+		  case(led_agd)
+		   //3'b000: o_led_agd<=3'b101;
+			//3'b001: o_led_agd<=3'b000;
+			//3'b010: o_led_agd<=3'b000;
+			3'b011: o_led_agd<=  3'b101;
+			//3'b100: o_led_agd<=3'b000;
+		   3'b101: o_led_agd<=  3'b110;
+			3'b110: o_led_agd<=  3'b110;
+			//3'b111: o_led_agd<=  3'b101;
+			default:o_led_agd<=  3'b101;
+		  endcase
+		  end
+		  else
+			  o_led_agd<=o_led_agd;
+	   end
+		end
+
+always @ (negedge (i_key_l&&i_key_r))//每0.1秒触发一次
+       led_agd<=o_led_agd;
+endmodule
+	
